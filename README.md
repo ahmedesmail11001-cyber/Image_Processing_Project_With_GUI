@@ -79,15 +79,6 @@ Or open the folder in **CLion**, set the CMake option
 4. Use **Undo / Redo** or the history strip to move between steps.
 5. Click **Save image** to export the result.
 
-## 👥 Team
-
-| Name | Section |
-|------|---------|
-| Mahmoud Waleed Saad | Monday Library lab – S15 |
-| Ahmed Ismail Omran | Monday Library lab – S15 |
-| Ahmed Walid Badr | Monday Library lab – S15 |
-| Mohammed Mokhtar Mohammed | Monday Library lab – S15 |
-
 ## 📄 License
 
 Educational project for CS213 at FCAI – Cairo University.
