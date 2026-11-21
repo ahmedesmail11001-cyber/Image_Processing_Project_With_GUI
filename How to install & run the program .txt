@@ -1,0 +1,198 @@
+================================================================================
+  NOVA Virtual Machine  -  Vole Machine Simulator with a Qt graphical interface
+================================================================================
+
+1. REQUIREMENTS
+--------------------------------------------------------------------------------
+  - Qt 6 (Qt 5 also works)
+  - CMake 3.16 or newer      (installed with Qt Creator)
+  - A C++17 compiler         (MinGW or MSVC on Windows, g++ on Linux)
+  - No other libraries are needed. The simulator itself is standard C++.
+
+--------------------------------------------------------------------------------
+2. INSTALL AND BUILD (Qt Creator - recommended)
+--------------------------------------------------------------------------------
+  1. Unzip the project so that all files are in ONE folder
+
+  2. Open Qt Creator.
+     File -> Open File or Project...  -> choose  CMakeLists.txt  from this folder.
+
+  3. On the "Configure Project" page select a kit (for example
+     "Desktop Qt 6.x.x MinGW 64-bit") and press  Configure Project.
+
+  4. Choose the "Debug" or "Release" build from the kit button on the left bar.
+
+  5. Build:  Build -> Build Project   (Ctrl+B)
+
+  6. Run:    press the green Run button  (Ctrl+R).
+     The window "NOVA Virtual Machine" opens.
+
+
+--------------------------------------------------------------------------------
+3. BUILD FROM THE COMMAND LINE (optional)
+--------------------------------------------------------------------------------
+Open a terminal in the project folder (with Qt and CMake in the PATH):
+
+     mkdir build
+     cd build
+     cmake ..
+     cmake --build .
+
+Then start the program:   NovaVM.exe   (Windows)   or   ./NovaVM   (Linux)
+
+If you start the .exe outside Qt Creator on Windows and a "Qt6Widgets.dll was
+not found" message appears, run the Qt deploy tool once next to the .exe:
+
+     windeployqt NovaVM.exe
+
+
+--------------------------------------------------------------------------------
+4. HOW TO USE THE PROGRAM
+--------------------------------------------------------------------------------
+The window has four areas.
+
+  TOP BAR
+     PROGRAM COUNTER   address of the next instruction (hex)
+     Run program       runs the whole program at once          (shortcut F5)
+     Step              executes ONE instruction                (shortcut F10)
+     Stop              stops a running program
+     CYCLE             number of instructions executed so far
+     CORE STATUS       STANDBY (nothing stored) / READY / RUNNING / HALTED
+
+  LEFT: MACHINE CODE + OUTPUT SCREEN
+     1) Write the program in the MACHINE CODE box, one instruction per line,
+        OR press  "Load file..."  to open a program file (see section 5).
+     2) Choose the format used in your code: Binary, Decimal or Hex.
+     3) Choose the START ADDRESS (hex). It must be even, from 00 to FE, and the
+        whole program must fit in memory.
+     4) Press "Store in memory". The program is written into memory cells.
+        (If nothing is stored yet, Run and Step store the code automatically.)
+     The OUTPUT SCREEN shows the status messages, errors, and everything the
+     program writes to address FF (as ASCII text, after "SCREEN").
+
+  MIDDLE: CPU REGISTERS
+     The 16 registers R0..RF in binary and hex. Move the mouse over a row to
+     highlight it.
+
+  RIGHT: MEMORY MATRIX
+     The 256 memory cells: address, value (hex) and binary. The row of the
+     program counter is shown in green. The counter above shows how many cells
+     are not zero.
+
+Typical session:
+     write code -> choose format -> Store in memory -> Step (watch the changes)
+     or Run program -> read the registers / memory / output screen.
+
+Run stops when the program reaches the halt instruction (C000), when an invalid
+instruction is found, or after 100000 instructions (possible endless loop; the
+message tells you and you can press Run to continue or Store to start over).
+To run the same program again, press "Store in memory" again.
+
+
+--------------------------------------------------------------------------------
+5. PROGRAM FILES AND FORMATS
+--------------------------------------------------------------------------------
+A program is a list of 16-bit instructions, one per line.
+
+  HEX      4 hex digits per line, for example        2145
+  BINARY   16 bits per line (spaces allowed)         0010 0001 0100 0101
+  DECIMAL  a number from 0 to 65535                  8517
+
+  - Empty lines are ignored.
+  - Everything after a  ;  is a comment.
+  - If one line is invalid, NOTHING is loaded and the Output screen shows the
+    line number and the reason.
+
+"Load file..." opens the file dialog on your Desktop folder (you can browse to
+any other folder, and choose .txt / .vole / .hex or "All files"). After you
+pick a file, its text appears in the editor, the format is chosen automatically
+(Binary if every line has 16 bits of 0/1, otherwise Hex) and the program is
+stored in memory at the start address. Then press Run or Step.
+If a file uses Decimal numbers, select Decimal and press "Store in memory".
+
+Example program file (prints "Hi" on the output screen):
+
+     2148 ; R1 = 0x48 ('H')
+     31FF ; write R1 to the screen (address FF)
+     2269 ; R2 = 0x69 ('i')
+     32FF ; write R2 to the screen
+     C000 ; halt
+
+
+--------------------------------------------------------------------------------
+6. INSTRUCTION SET
+--------------------------------------------------------------------------------
+Every instruction has 4 hex digits. R, S, T are register numbers (the 2nd, 3rd
+and 4th digit); XY are the last two hex digits.
+
+  1RXY   LOAD register R with the contents of memory cell XY
+  2RXY   LOAD register R with the value XY
+  3RXY   STORE register R into memory cell XY
+         (if XY = FF the value is written to the screen instead)
+  40RS   MOVE the contents of register R to register S
+  5RST   ADD registers S and T as two's complement, result in R
+  6RST   ADD registers S and T as floating point, result in R
+         (8 bits: 1 sign bit, 3-bit exponent excess-4, 4-bit mantissa)
+  7RST   OR  of registers S and T, result in R
+  8RST   AND of registers S and T, result in R
+  9RST   XOR of registers S and T, result in R
+  AR0X   ROTATE register R to the right X times (circular)
+  BRXY   JUMP to the instruction at address XY if register R equals register 0
+  C000   HALT
+
+
+--------------------------------------------------------------------------------
+7. TROUBLESHOOTING
+--------------------------------------------------------------------------------
+  "ui_MainWindow.h: No such file or directory"
+      Build -> Clear CMake Configuration, then Build -> Run CMake, then
+      Build -> Rebuild Project. (This file is generated from MainWindow.ui.)
+
+  "undefined reference to qMain"
+      main.cpp is missing from the project or is empty. Use the main.cpp of this
+      project and run CMake again.
+
+  Errors about a class (Screen, Memory, ...) that "has no member ..."
+      An old empty file is still in the folder. Replace it with the real file
+      of this project and run CMake again.
+
+  The window is light grey / not styled
+      style.qss and resources.qrc must be in the project folder, the prefix in
+      resources.qrc must be "/", and the project must be rebuilt.
+
+  A file added in the folder does not appear in Qt Creator
+      The file must be listed in CMakeLists.txt. Save CMakeLists.txt and use
+      Build -> Run CMake.
+
+  "Start address must be an even number" / "... between 00 and FE"
+      Change START ADDRESS (hex, even, 00 to FE).
+
+  "The program does not fit in memory at this start address"
+      Use a smaller start address or a shorter program.
+
+
+--------------------------------------------------------------------------------
+8. PROJECT FILES
+--------------------------------------------------------------------------------
+  Simulator (standard C++, no Qt):
+     Memory, RegisterFile        256 memory cells and 16 registers
+     Instruction                 decodes the 16-bit instruction
+     Alu                         the arithmetic / logic operations
+     CPU                         fetch - decode - execute cycle
+     Screen                      collects what is written to address FF
+     ProgramLoader               reads and validates a program
+     Machine                     owns memory, screen and CPU
+
+  Graphical interface (Qt):
+     main.cpp                    starts the application
+     MainWindow.h/.cpp/.ui       the window and all button logic
+     CodeEditor.h/.cpp           machine code box with line numbers
+     CodeParser.h/.cpp           converts Binary / Decimal / Hex lines to hex
+     WaveformWidget.h/.cpp       small animated widget (currently hidden)
+     style.qss, resources.qrc    colors and styling of the interface
+     CMakeLists.txt (NovaVM.pro) project file
+
+  UI.h / UI.cpp is the old console menu. It is not used by the graphical
+  version and is not part of the build.
+
+================================================================================
