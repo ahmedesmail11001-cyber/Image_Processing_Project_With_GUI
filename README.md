@@ -6,7 +6,7 @@ A desktop image editor built with **C++**, **OOP** and **Qt**, featuring **18 im
 > Faculty of Computing and Artificial Intelligence (FCAI), Cairo University · 2026–2027
 > 👨‍🏫 Supervised by **Dr. Mohammad El-Ramly**
 
-🎥 **[Watch the demo video](https://drive.google.com/file/d/111sBMX-dty5qfrL2v_PnDpPEMFxap0tR/view?usp=drive_link)**
+🎥 **[Watch the demo video](https://youtu.be/Que_-PetUDU?si=jPaMbw5nYNvftDH7)**
 
 <!-- Add a screenshot of the app here: -->
 <!-- ![PixelForge screenshot](docs/screenshot.png) -->
